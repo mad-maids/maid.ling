@@ -47,5 +47,4 @@ async def get_empty_rooms(
         except exceptions.ClientResponseError:
             logging.exception(f"GET request failed: {empty_rooms['errorMsg']}")
         else:
-            empty_rooms = await resp.json(encoding="utf-8")
             return empty_rooms
