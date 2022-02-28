@@ -10,10 +10,10 @@ services:
             - redis
         stop_signal: SIGINT
     redis:
-        container_name: redis_db
+        container_name: room_finder_db
         image: redis:6.2-alpine
         restart: "unless-stopped"
         volumes:
             - "./redis.conf:/usr/local/etc/redis/redis.conf"
-            - "~/redis_data:/data"
+            - "~/room_finder_data:/data"
         command: "redis-server /usr/local/etc/redis/redis.conf"
