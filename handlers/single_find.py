@@ -11,18 +11,19 @@ of the following ways:
 All of these cases are handled here.
 """
 
+from datetime import datetime
+
 from aiogram import types
 
 from loader import dp
-from utils.formatter import format_dict
 from utils.get_rooms import get_empty_rooms
-from utils.process_rooms import process_rooms
 from utils.regex import (
     ALL_PARAMS_RE,
     DAY_AND_START_RE,
     START_AND_END_RE,
     START_ONLY_RE,
 )
+from utils.reply import reply
 from utils.validate import validate_end, validate_start
 
 
@@ -47,17 +48,20 @@ async def process_start_only(message: types.Message):
     available at 10-11 time slot.
     """
 
+    await message.answer_chat_action("typing")
+
     start_hour = int(message.text)
 
     if await validate_start(start_hour, message):
         empty_rooms = await get_empty_rooms(start_hour)
 
         if empty_rooms:
-            processed_rooms = process_rooms(empty_rooms)
-            text = format_dict(processed_rooms)
-            await message.reply(text)
+            await reply(message, empty_rooms)
         else:
-            await message.reply("Something went wrong, gomennasai.")
+            if datetime.today().weekday() == 6:
+                await message.reply("University doesn't work on Sundays.")
+            else:
+                await message.reply("Something went wrong, gomennasai.")
 
 
 @dp.message_handler(regexp=START_AND_END_RE)
@@ -71,6 +75,8 @@ async def process_start_and_end(message: types.Message):
     for today for that specific time slot.
     """
 
+    await message.answer_chat_action("typing")
+
     start_hour, end_hour = [int(item) for item in message.text.split("-")]
 
     if await validate_start(start_hour, message) and await validate_end(
@@ -78,13 +84,10 @@ async def process_start_and_end(message: types.Message):
     ):
         empty_rooms = await get_empty_rooms(start=start_hour, end=end_hour)
 
-        if not empty_rooms:
+        if empty_rooms:
+            await reply(message, empty_rooms)
+        else:
             await message.reply("Something went wrong, gomennasai.")
-            return
-
-        processed_rooms = process_rooms(empty_rooms)
-        text = format_dict(processed_rooms)
-        await message.reply(text)
 
 
 @dp.message_handler(regexp=DAY_AND_START_RE)
@@ -97,6 +100,8 @@ async def process_day_and_start(message: types.Message):
     for one hour.
     """
 
+    await message.answer_chat_action("typing")
+
     weekday, start_hour = message.text.split()
     # pls dont judge me for this dumb implementation, i know im retarded
     weekday = WEEKDAYS[weekday[:3].lower()]
@@ -106,9 +111,7 @@ async def process_day_and_start(message: types.Message):
         empty_rooms = await get_empty_rooms(start=start_hour, weekday=weekday)
 
         if empty_rooms:
-            processed_rooms = process_rooms(empty_rooms)
-            text = format_dict(processed_rooms)
-            await message.reply(text)
+            await reply(message, empty_rooms)
         else:
             await message.reply("Something went wrong, gomennasai.")
 
@@ -123,6 +126,8 @@ async def process_all_params(message: types.Message):
     weekday for that specific time slot.
     """
 
+    await message.answer_chat_action("typing")
+
     weekday, time_range = message.text.split()
     # pls dont judge me for this dumb implementation, i know im retarded
     weekday = WEEKDAYS[weekday[:3].lower()]
@@ -135,10 +140,7 @@ async def process_all_params(message: types.Message):
             start=start_hour, end=end_hour, weekday=weekday
         )
 
-        if not empty_rooms:
+        if empty_rooms:
+            await reply(message, empty_rooms)
+        else:
             await message.reply("Something went wrong, gomennasai.")
-            return
-
-        processed_rooms = process_rooms(empty_rooms)
-        text = format_dict(processed_rooms)
-        await message.reply(text)

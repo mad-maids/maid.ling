@@ -27,8 +27,8 @@ START_HOURS = [str(n) for n in range(9, 22)]
 @dp.throttled(rate=3)
 async def send_weekday_keyboard(message: types.Message):
     """Ask user to pick a weekday from a Reply keyboard."""
-    await FindCommand.weekday.set()
     await message.answer_chat_action(action="typing")
+    await FindCommand.weekday.set()
 
     week_days = [
         "Monday",
@@ -52,8 +52,8 @@ async def send_weekday_keyboard(message: types.Message):
 @dp.message_handler(regexp=WEEKDAYS_RE, state=FindCommand.weekday)
 async def send_start_keyboard(message: types.Message, state: FSMContext):
     """Ask user to pick a start hour from a Reply keyboard."""
-    await FindCommand.start_hour.set()
     await message.answer_chat_action(action="typing")
+    await FindCommand.start_hour.set()
     await state.update_data(weekday=message.text)
 
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
@@ -66,13 +66,13 @@ async def send_start_keyboard(message: types.Message, state: FSMContext):
 @dp.message_handler(regexp=START_ONLY_RE, state=FindCommand.start_hour)
 async def send_end_keyboard(message: types.Message, state: FSMContext):
     """Ask user to pick an end hour from a Reply keyboard."""
+    await message.answer_chat_action(action="typing")
     start_hour = int(message.text)
 
     if not await validate_start(start_hour, message):
         return
 
     await FindCommand.end_hour.set()
-    await message.answer_chat_action(action="typing")
     await state.update_data(start=message.text)
 
     end_hours = START_HOURS[START_HOURS.index(str(start_hour)) + 1 :]
@@ -88,6 +88,8 @@ async def send_end_keyboard(message: types.Message, state: FSMContext):
 @dp.message_handler(regexp=START_ONLY_RE, state=FindCommand.end_hour)
 async def process_find_request(message: types.Message, state: FSMContext):
     """Find empty rooms with all the given user input."""
+    await message.answer_chat_action(action="typing")
+
     req_data = await state.get_data()
     start_hour = int(req_data["start"])
     end_hour = int(message.text)
@@ -96,7 +98,6 @@ async def process_find_request(message: types.Message, state: FSMContext):
         return
 
     weekday = req_data["weekday"]
-    await message.answer_chat_action(action="typing")
 
     empty_rooms = await get_empty_rooms(
         start=start_hour, end=end_hour, weekday=weekday
