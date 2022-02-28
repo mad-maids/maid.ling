@@ -5,6 +5,8 @@ It got very repetitive without them.
 
 from aiogram import types
 
+from data.constants import INVALID_END, INVALID_START
+
 
 async def validate_start(start: int, message: types.Message) -> bool:
     """Return True if start hour is valid else False.
@@ -29,7 +31,7 @@ async def validate_start(start: int, message: types.Message) -> bool:
     valid = 9 <= start < 22
 
     if not valid:
-        await message.reply("Gomennasai, university is closed at this time.")
+        await message.reply(INVALID_START)
 
     return valid
 
@@ -59,6 +61,6 @@ async def validate_end(start: int, end: int, message: types.Message) -> bool:
     valid = (9 < end <= 22) and end > start
 
     if not valid:
-        await message.reply("Baka, please provide a valid end hour.")
+        await message.reply(INVALID_END)
 
     return valid

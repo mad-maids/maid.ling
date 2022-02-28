@@ -4,6 +4,7 @@ from aiogram import types
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Command, Text
 
+from data.constants import CANCEL_MSG
 from loader import dp
 
 
@@ -13,6 +14,4 @@ from loader import dp
 async def reset_state(message: types.Message, state: FSMContext):
     """The function name says it all."""
     await state.finish()
-    await message.answer(
-        "Okay, cancelled.", reply_markup=types.ReplyKeyboardRemove()
-    )
+    await message.answer(CANCEL_MSG, reply_markup=types.ReplyKeyboardRemove())

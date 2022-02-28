@@ -15,6 +15,7 @@ from datetime import datetime
 
 from aiogram import types
 
+from data.constants import NO_SUNDAY, SORRY_UNEXPECTED, WEEKDAYS
 from loader import dp
 from utils.get_rooms import get_empty_rooms
 from utils.regex import (
@@ -25,16 +26,6 @@ from utils.regex import (
 )
 from utils.reply import reply
 from utils.validate import validate_end, validate_start
-
-
-WEEKDAYS = {
-    "mon": "monday",
-    "tue": "tuesday",
-    "wed": "wednesday",
-    "thu": "thursday",
-    "fri": "friday",
-    "sat": "saturday",
-}
 
 
 @dp.message_handler(regexp=START_ONLY_RE)
@@ -59,9 +50,9 @@ async def process_start_only(message: types.Message):
             await reply(message, empty_rooms)
         else:
             if datetime.today().weekday() == 6:
-                await message.reply("University doesn't work on Sundays.")
+                await message.reply(NO_SUNDAY)
             else:
-                await message.reply("Something went wrong, gomennasai.")
+                await message.reply(SORRY_UNEXPECTED)
 
 
 @dp.message_handler(regexp=START_AND_END_RE)
@@ -87,7 +78,7 @@ async def process_start_and_end(message: types.Message):
         if empty_rooms:
             await reply(message, empty_rooms)
         else:
-            await message.reply("Something went wrong, gomennasai.")
+            await message.reply(SORRY_UNEXPECTED)
 
 
 @dp.message_handler(regexp=DAY_AND_START_RE)
@@ -113,7 +104,7 @@ async def process_day_and_start(message: types.Message):
         if empty_rooms:
             await reply(message, empty_rooms)
         else:
-            await message.reply("Something went wrong, gomennasai.")
+            await message.reply(SORRY_UNEXPECTED)
 
 
 @dp.message_handler(regexp=ALL_PARAMS_RE)
@@ -143,4 +134,4 @@ async def process_all_params(message: types.Message):
         if empty_rooms:
             await reply(message, empty_rooms)
         else:
-            await message.reply("Something went wrong, gomennasai.")
+            await message.reply(SORRY_UNEXPECTED)

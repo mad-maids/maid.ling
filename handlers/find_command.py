@@ -7,11 +7,18 @@ final GET request at the end.
 3. ask to input end
 """
 
-
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Command
 
+from data.constants import (
+    PICK_END,
+    PICK_START,
+    PICK_WEEKDAY,
+    SORRY_UNEXPECTED,
+    START_HOURS,
+    WEEK_DAYS,
+)
 from loader import dp
 from states.states import FindCommand
 from utils.formatter import format_dict
@@ -19,8 +26,6 @@ from utils.get_rooms import get_empty_rooms
 from utils.process_rooms import process_rooms
 from utils.regex import START_ONLY_RE, WEEKDAYS_RE
 from utils.validate import validate_end, validate_start
-
-START_HOURS = [str(n) for n in range(9, 22)]
 
 
 @dp.message_handler(Command("find"))
@@ -30,21 +35,12 @@ async def send_weekday_keyboard(message: types.Message):
     await message.answer_chat_action(action="typing")
     await FindCommand.weekday.set()
 
-    week_days = [
-        "Monday",
-        "Tuesday",
-        "Wednesday",
-        "Thursday",
-        "Friday",
-        "Saturday",
-    ]
-
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    keyboard.add(*week_days)
+    keyboard.add(*WEEK_DAYS)
     keyboard.add("Cancel")
 
     await message.answer(
-        "Please choose the weekday you are interested in.",
+        PICK_WEEKDAY,
         reply_markup=keyboard,
     )
 
@@ -60,7 +56,7 @@ async def send_start_keyboard(message: types.Message, state: FSMContext):
     keyboard.add(*START_HOURS)
     keyboard.add("Cancel")
 
-    await message.answer("Please pick a start hour.", reply_markup=keyboard)
+    await message.answer(PICK_START, reply_markup=keyboard)
 
 
 @dp.message_handler(regexp=START_ONLY_RE, state=FindCommand.start_hour)
@@ -82,7 +78,7 @@ async def send_end_keyboard(message: types.Message, state: FSMContext):
     keyboard.add(*end_hours)
     keyboard.add("Cancel")
 
-    await message.answer("Please pick an end hour.", reply_markup=keyboard)
+    await message.answer(PICK_END, reply_markup=keyboard)
 
 
 @dp.message_handler(regexp=START_ONLY_RE, state=FindCommand.end_hour)
@@ -109,7 +105,7 @@ async def process_find_request(message: types.Message, state: FSMContext):
         await message.answer(text, reply_markup=types.ReplyKeyboardRemove())
     else:
         await message.reply(
-            "Something went wrong, gomennasai.",
+            SORRY_UNEXPECTED,
             reply_markup=types.ReplyKeyboardRemove(),
         )
 

@@ -5,10 +5,8 @@ from typing import Dict, List, Optional, Union
 
 import aiohttp.client_exceptions as exceptions
 
+from data.constants import GET_ROOMS_URL
 from loader import session
-
-BASE_URL = "https://api.monoceros.uz"
-GET_ROOMS_URL = f"{BASE_URL}/getRooms"
 
 
 async def get_empty_rooms(
