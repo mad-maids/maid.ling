@@ -1,0 +1,5 @@
+aiogram==2.19
+aiohttp==3.8.1
+aioredis==2.0.1
+emoji==1.6.3
+environs==9.5.0

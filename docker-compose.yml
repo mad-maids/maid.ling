@@ -1,0 +1,19 @@
+version: "3.7"
+services:
+    bot:
+        build: .
+        container_name: room-finder
+        restart: "unless-stopped"
+        env_file:
+            - .env
+        depends_on:
+            - redis
+        stop_signal: SIGINT
+    redis:
+        container_name: redis_db
+        image: redis:6.2-alpine
+        restart: "unless-stopped"
+        volumes:
+            - "./redis.conf:/usr/local/etc/redis/redis.conf"
+            - "~/redis_data:/data"
+        command: "redis-server /usr/local/etc/redis/redis.conf"
