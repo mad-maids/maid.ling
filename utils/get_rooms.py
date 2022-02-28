@@ -38,11 +38,16 @@ async def get_empty_rooms(
     if weekday:
         params["day"] = weekday
 
-    async with session.get(GET_ROOMS_URL, params=params) as resp:
-        empty_rooms = await resp.json(encoding="utf-8")
-        try:
-            resp.raise_for_status()
-        except exceptions.ClientResponseError:
-            logging.exception(f"GET request failed: {empty_rooms['errorMsg']}")
-        else:
-            return empty_rooms
+    try:
+        async with session.get(GET_ROOMS_URL, params=params) as resp:
+            empty_rooms = await resp.json(encoding="utf-8")
+            try:
+                resp.raise_for_status()
+            except exceptions.ClientResponseError:
+                logging.exception(
+                    f"GET request failed: {empty_rooms['errorMsg']}"
+                )
+            else:
+                return empty_rooms
+    except exceptions.ClientConnectorError as e:
+        logging.exception(e)
