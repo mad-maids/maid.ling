@@ -7,8 +7,8 @@ import aiohttp.client_exceptions as exceptions
 
 from loader import session
 
-BASE_URL = "http://localhost:8080"
-ROUTE = "getRooms"
+BASE_URL = "https://api.monoceros.uz"
+GET_ROOMS_URL = f"{BASE_URL}/getRooms"
 
 
 async def get_empty_rooms(
@@ -40,20 +40,12 @@ async def get_empty_rooms(
     if weekday:
         params["day"] = weekday
 
-    async with session.get(f"{BASE_URL}/{ROUTE}", params=params) as resp:
+    async with session.get(GET_ROOMS_URL, params=params) as resp:
+        empty_rooms = await resp.json(encoding="utf-8")
         try:
             resp.raise_for_status()
-        except exceptions.ClientResponseError as e:
-            logging.exception(e)
+        except exceptions.ClientResponseError:
+            logging.exception(f"GET request failed: {empty_rooms['errorMsg']}")
         else:
             empty_rooms = await resp.json(encoding="utf-8")
             return empty_rooms
-#     try:
-#         res = urllib.request.urlopen(url)
-#     except HTTPError:
-#         logging.exception(f"GET request failed: {url}\n{HTTPError}")
-#         return None
-#     else:
-#         data = res.read()
-#         empty_rooms = json.loads(data.decode("utf-8"))
-#         return empty_rooms
