@@ -2,13 +2,19 @@ import logging
 
 import aiohttp
 from aiogram import Bot, Dispatcher, types
-from aiogram.contrib.fsm_storage.memory import MemoryStorage
+from aiogram.contrib.fsm_storage.redis import RedisStorage2
 
 from data import config
 
 session = aiohttp.ClientSession()
 bot = Bot(token=config.BOT_TOKEN, parse_mode=types.ParseMode.HTML)
-storage = MemoryStorage()
+
+storage = RedisStorage2(
+    config.REDIS_HOST,
+    config.REDIS_PORT,
+    config.REDIS_DB,
+    config.REDIS_PASSWORD,
+)
 dp = Dispatcher(bot, storage=storage)
 
 logging.basicConfig(
